@@ -5,6 +5,13 @@
 #       VERSION:  1.0.1
 # ------------------------------------------------------------------------------
 
+function untar() {
+    if [ `tar -tf $1 | grep -E '^[^/]+[/]{0,1}$' | wc -l` -gt 1 ]; then
+        echo "Tarbomb detected!  Disaster averted :)";
+    else
+        tar $2 $1
+    fi
+}
 
 function extract() {
   local remove_archive
@@ -38,15 +45,15 @@ function extract() {
     file_name="$( basename "$1" )"
     extract_dir="$( echo "$file_name" | sed "s/\.${1##*.}//g" )"
     case "$1" in
-      (*.tar.gz|*.tgz) tar xvzf "$1" ;;
-      (*.tar.bz2|*.tbz|*.tbz2) tar xvjf "$1" ;;
-      (*.tar.xz|*.txz) tar --xz --help &> /dev/null \
+      (*.tar.gz|*.tgz) untar "$1" "xvzf" ;;
+      (*.tar.bz2|*.tbz|*.tbz2) untar "$1" "xvjf" ;;
+      (*.tar.xz|*.txz) --xz --help &> /dev/null \
         && tar --xz -xvf "$1" \
         || xzcat "$1" | tar xvf - ;;
       (*.tar.zma|*.tlz) tar --lzma --help &> /dev/null \
         && tar --lzma -xvf "$1" \
         || lzcat "$1" | tar xvf - ;;
-      (*.tar) tar xvf "$1" ;;
+      (*.tar) untar "$1" "xvf" ;;
       (*.gz) gunzip "$1" ;;
       (*.bz2) bunzip2 "$1" ;;
       (*.xz) unxz "$1" ;;
